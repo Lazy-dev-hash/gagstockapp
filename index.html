@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gagstock Tracker 🌾</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+</head>
+<body>
+  <div id="tsparticles"></div>
+  <audio id="bgm" src="https://cdn.pixabay.com/audio/2023/03/28/audio_7d3db327a6.mp3" autoplay loop></audio>
+  <div class="loading-screen" id="loading">
+    <lord-icon src="https://cdn.lordicon.com/jjoolpwc.json" trigger="loop" colors="primary:#88e7a3,secondary:#ffc6ff" style="width:100px;height:100px"></lord-icon>
+    <p>Loading the magical garden...</p>
+    <span>✨ Created by Sunnel ✨</span>
+  </div>
+  <header>
+    <h1>🌾 Gagstock Tracker</h1>
+  </header>
+  <main class="container" id="tracker">
+    <div class="card" id="gear">
+      <div class="section-title">🛠️ Gear</div>
+      <div class="stock-list" id="gearList">Loading...</div>
+      <div class="countdown-bar"><div class="countdown-fill" id="gearFill"></div><canvas class="circular-timer" id="gearCircle"></canvas></div>
+    </div>
+    <div class="card" id="seeds">
+      <div class="section-title">🌱 Seeds</div>
+      <div class="stock-list" id="seedList">Loading...</div>
+    </div>
+    <div class="card" id="eggs">
+      <div class="section-title">🥚 Eggs</div>
+      <div class="stock-list" id="eggList">Loading...</div>
+      <div class="countdown-bar"><div class="countdown-fill" id="eggFill"></div><canvas class="circular-timer" id="eggCircle"></canvas></div>
+    </div>
+    <div class="card" id="weather">
+      <div class="section-title">🌤️ Weather</div>
+      <lottie-player id="weatherLottie" background="transparent" speed="1" loop autoplay style="width: 100px; height: 100px;"></lottie-player>
+      <div id="weatherDesc">Loading...</div>
+      <div id="weatherBonus"></div>
+    </div>
+    <div class="card" id="honey">
+      <div class="section-title">🍯 Honey Stock</div>
+      <div class="stock-list" id="honeyList">Loading...</div>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
