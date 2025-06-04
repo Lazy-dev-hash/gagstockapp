@@ -1,0 +1,290 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gagstock Tracker 🌾</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary: #88e7a3;
+      --accent: #ffc6ff;
+      --bg: #1e1e2f;
+      --text: #ffffff;
+    }
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(145deg, #1a1f2f, #12131e);
+      color: var(--text);
+      overflow-x: hidden;
+      position: relative;
+    }
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem 1rem;
+      position: relative;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(to right, #88e7a3, #ffc6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .theme-switch {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      cursor: pointer;
+      user-select: none;
+      font-size: 1.4rem;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+      z-index: 1;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ffffff22;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 30px rgba(255, 255, 255, 0.2);
+      animation: bloom 0.6s ease forwards;
+    }
+    @keyframes bloom {
+      from {
+        filter: brightness(1);
+      }
+      to {
+        filter: brightness(1.2);
+      }
+    }
+    .countdown-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #444;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+    .countdown-fill {
+      height: 100%;
+      background: linear-gradient(to right, #88e7a3, #ffc6ff);
+      transition: width 1s linear;
+    }
+    .circular-timer {
+      position: absolute;
+      right: -50px;
+      top: -10px;
+      width: 40px;
+      height: 40px;
+    }
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 0.3rem;
+    }
+    .stock-list {
+      white-space: pre-line;
+      font-family: monospace;
+      line-height: 1.4;
+    }
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #12131e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      z-index: 9999;
+      text-align: center;
+    }
+    .loading-screen p, .loading-screen span {
+      animation: glow 3s ease-in-out infinite alternate;
+      margin-top: 10px;
+      font-weight: 500;
+      font-size: 1.3rem;
+    }
+    @keyframes glow {
+      0% { color: #88e7a3; }
+      50% { color: #ffc6ff; }
+      100% { color: #ffffff; }
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="tsparticles"></div>
+  <div class="loading-screen" id="loading">
+    <lord-icon
+      src="https://cdn.lordicon.com/jjoolpwc.json"
+      trigger="loop"
+      colors="primary:#88e7a3,secondary:#ffc6ff"
+      style="width:100px;height:100px">
+    </lord-icon>
+    <p>Loading the magical garden...</p>
+    <span>✨ Created by Sunnel ✨</span>
+  </div>
+  <header>
+    <h1>🌾 Gagstock Tracker</h1>
+    <div class="theme-switch" onclick="toggleTheme()">🌓</div>
+  </header>
+  <main class="container" id="tracker">
+    <div class="card" id="gear">
+      <div class="section-title">🛠️ Gear</div>
+      <div class="stock-list" id="gearList">Loading...</div>
+      <div class="countdown-bar">
+        <div class="countdown-fill" id="gearFill"></div>
+        <canvas class="circular-timer" id="gearCircle"></canvas>
+      </div>
+    </div>
+    <div class="card" id="seeds">
+      <div class="section-title">🌱 Seeds</div>
+      <div class="stock-list" id="seedList">Loading...</div>
+    </div>
+    <div class="card" id="eggs">
+      <div class="section-title">🥚 Eggs</div>
+      <div class="stock-list" id="eggList">Loading...</div>
+      <div class="countdown-bar">
+        <div class="countdown-fill" id="eggFill"></div>
+        <canvas class="circular-timer" id="eggCircle"></canvas>
+      </div>
+    </div>
+    <div class="card" id="weather">
+      <div class="section-title">🌤️ Weather</div>
+      <lottie-player id="weatherLottie" background="transparent" speed="1" loop autoplay style="width: 100px; height: 100px;"></lottie-player>
+      <div id="weatherDesc">Loading...</div>
+      <div id="weatherBonus"></div>
+    </div>
+    <div class="card" id="honey">
+      <div class="section-title">🍯 Honey Stock</div>
+      <div class="stock-list" id="honeyList">Loading...</div>
+    </div>
+  </main>
+  <script>
+    const loadingScreen = document.getElementById("loading");
+    const themes = [
+      { bg: "#1e1e2f", text: "#ffffff" },
+      { bg: "#fef6e4", text: "#272343" },
+      { bg: "#102820", text: "#e8f6ef" }
+    ];
+    let themeIndex = 0;
+    function toggleTheme() {
+      themeIndex = (themeIndex + 1) % themes.length;
+      document.body.style.background = `linear-gradient(145deg, ${themes[themeIndex].bg}, #12131e)`;
+      document.body.style.color = themes[themeIndex].text;
+    }
+
+    function updateCountdown(fillId, secondsLeft, maxSeconds) {
+      const fill = document.getElementById(fillId);
+      const percent = Math.min(100, (secondsLeft / maxSeconds) * 100);
+      fill.style.width = `${percent}%`;
+    }
+
+    function drawCircularTimer(canvasId, percent) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const radius = 18;
+      canvas.width = canvas.height = 40;
+      ctx.clearRect(0, 0, 40, 40);
+      ctx.beginPath();
+      ctx.arc(20, 20, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(20, 20, radius, -Math.PI / 2, 2 * Math.PI * (percent / 100) - Math.PI / 2);
+      ctx.strokeStyle = "#88e7a3";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    async function fetchData() {
+      try {
+        const [gearRes, eggRes, weatherRes, honeyRes] = await Promise.all([
+          fetch("https://growagardenstock.com/api/stock?type=gear-seeds"),
+          fetch("https://growagardenstock.com/api/stock?type=egg"),
+          fetch("https://growagardenstock.com/api/stock/weather"),
+          fetch("http://65.108.103.151:22377/api/stocks?type=honeyStock")
+        ]);
+        const gear = await gearRes.json();
+        const egg = await eggRes.json();
+        const weather = await weatherRes.json();
+        const honey = await honeyRes.json();
+
+        document.getElementById("gearList").textContent = gear.gear?.join("\n") || "No gear.";
+        document.getElementById("seedList").textContent = gear.seeds?.join("\n") || "No seeds.";
+        document.getElementById("eggList").textContent = egg.egg?.join("\n") || "No eggs.";
+
+        document.getElementById("weatherDesc").textContent = `${weather.icon || "🌦️"} ${weather.currentWeather}`;
+        document.getElementById("weatherBonus").textContent = `🪴 Bonus: ${weather.cropBonuses}`;
+        document.getElementById("weatherLottie").setAttribute("src", weather.lottieUrl || "https://assets7.lottiefiles.com/packages/lf20_iwmd6pyr.json");
+
+        const honeyList = honey.honeyStock || [];
+        document.getElementById("honeyList").textContent = honeyList.length
+          ? honeyList.map((h) => `🍯 ${h.name}: ${h.value}`).join("\n")
+          : "No honey available.";
+
+        const now = Date.now();
+        const gearLeft = 300 - Math.floor((now - gear.updatedAt) / 1000);
+        const eggLeft = 600 - Math.floor((now - egg.updatedAt) / 1000);
+        updateCountdown("gearFill", gearLeft, 300);
+        updateCountdown("eggFill", eggLeft, 600);
+        drawCircularTimer("gearCircle", (gearLeft / 300) * 100);
+        drawCircularTimer("eggCircle", (eggLeft / 600) * 100);
+
+        if (loadingScreen) loadingScreen.classList.add("hidden");
+      } catch (err) {
+        console.error("Failed to fetch:", err);
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 30000);
+
+    tsParticles.load("tsparticles", {
+      fullScreen: { enable: false },
+      particles: {
+        number: { value: 60 },
+        size: { value: 3 },
+        move: { enable: true, speed: 0.6 },
+        color: { value: ["#88e7a3", "#ffc6ff"] },
+        links: { enable: true, color: "#ffffff33" },
+      },
+      background: { color: "transparent" },
+    });
+
+  </script>
+</body>
+</html>
