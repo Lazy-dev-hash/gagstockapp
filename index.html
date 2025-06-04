@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gagstock Tracker 🌾</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.lordicon.com/lordicon.js"></script>
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
   <style>
     :root {
       --primary: #88e7a3;
@@ -38,7 +35,6 @@
       justify-content: center;
       align-items: center;
       padding: 2rem 1rem 1rem;
-      position: relative;
     }
     header h1 {
       font-size: 2.2rem;
@@ -50,8 +46,6 @@
       padding: 1rem;
       max-width: 900px;
       margin: auto;
-      position: relative;
-      z-index: 1;
     }
     .card {
       background: rgba(255, 255, 255, 0.05);
@@ -135,19 +129,22 @@
 <body>
   <div id="tsparticles"></div>
 
-  <!-- Hidden background music -->
-  <audio id="bgm" src="Multo.mp3" loop></audio>
+  <!-- Background Music -->
+  <audio id="bgm" src="Multo.mp3" loop autoplay></audio>
 
+  <!-- Loading Screen -->
   <div class="loading-screen" id="loading">
     <lord-icon src="https://cdn.lordicon.com/jjoolpwc.json" trigger="loop" colors="primary:#88e7a3,secondary:#ffc6ff" style="width:100px;height:100px"></lord-icon>
     <p>Loading the magical garden...</p>
     <span>✨ Created by Sunnel ✨</span>
   </div>
 
+  <!-- Header -->
   <header>
     <h1>🌾 Gagstock Tracker</h1>
   </header>
 
+  <!-- Main Content -->
   <main class="container" id="tracker">
     <div class="card" id="gear">
       <div class="section-title">🛠️ Gear</div>
@@ -175,19 +172,31 @@
     </div>
   </main>
 
+  <!-- Scripts at end for faster load -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.lordicon.com/lordicon.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
   <script>
-    // Autoplay background music after first interaction
+    // Attempt to force autoplay of background music
     const bgm = document.getElementById("bgm");
-    window.addEventListener("click", () => {
-      bgm.volume = 0.3;
-      bgm.play().catch(e => console.log("Autoplay blocked:", e));
-    }, { once: true });
+    bgm.volume = 0.3;
+    document.addEventListener("DOMContentLoaded", () => {
+      bgm.play().catch(e => {
+        bgm.muted = true;
+        bgm.play().then(() => {
+          setTimeout(() => bgm.muted = false, 500);
+        }).catch(err => console.warn("Still blocked:", err));
+      });
+    });
 
     const loadingScreen = document.getElementById("loading");
 
     function updateCountdown(fillId, secondsLeft, maxSeconds) {
       const fill = document.getElementById(fillId);
-      const percent = Math.min(100, (secondsLeft / maxSeconds) * 100);
+      if (!fill) return;
+      const percent = Math.min(100, Math.max(0, (secondsLeft / maxSeconds) * 100));
       fill.style.width = `${percent}%`;
     }
 
@@ -195,16 +204,22 @@
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
+      const size = 40;
+      canvas.width = size;
+      canvas.height = size;
       const radius = 18;
-      canvas.width = canvas.height = 40;
-      ctx.clearRect(0, 0, 40, 40);
+      ctx.clearRect(0, 0, size, size);
+
+      // Background circle
       ctx.beginPath();
-      ctx.arc(20, 20, radius, 0, 2 * Math.PI);
+      ctx.arc(size / 2, size / 2, radius, 0, 2 * Math.PI);
       ctx.strokeStyle = "#333";
       ctx.lineWidth = 4;
       ctx.stroke();
+
+      // Foreground arc
       ctx.beginPath();
-      ctx.arc(20, 20, radius, -Math.PI / 2, 2 * Math.PI * (percent / 100) - Math.PI / 2);
+      ctx.arc(size / 2, size / 2, radius, -Math.PI / 2, (2 * Math.PI * (percent / 100)) - Math.PI / 2);
       ctx.strokeStyle = "#88e7a3";
       ctx.lineWidth = 4;
       ctx.stroke();
@@ -218,41 +233,61 @@
           fetch("https://growagardenstock.com/api/stock/weather"),
           fetch("http://65.108.103.151:22377/api/stocks?type=honeyStock")
         ]);
+        if (!gearRes.ok || !eggRes.ok || !weatherRes.ok || !honeyRes.ok) {
+          throw new Error("One or more fetch requests failed");
+        }
+
         const gear = await gearRes.json();
         const egg = await eggRes.json();
         const weather = await weatherRes.json();
         const honey = await honeyRes.json();
 
-        document.getElementById("gearList").textContent = gear.gear?.join("\n") || "No gear.";
-        document.getElementById("seedList").textContent = gear.seeds?.join("\n") || "No seeds.";
-        document.getElementById("eggList").textContent = egg.egg?.join("\n") || "No eggs.";
+        document.getElementById("gearList").textContent = Array.isArray(gear.gear) ? gear.gear.join("\n") : "No gear.";
+        document.getElementById("seedList").textContent = Array.isArray(gear.seeds) ? gear.seeds.join("\n") : "No seeds.";
+        document.getElementById("eggList").textContent = Array.isArray(egg.egg) ? egg.egg.join("\n") : "No eggs.";
 
-        document.getElementById("weatherDesc").textContent = `${weather.icon || "🌦️"} ${weather.currentWeather}`;
-        document.getElementById("weatherBonus").textContent = `🪴 Bonus: ${weather.cropBonuses}`;
-        document.getElementById("weatherLottie").setAttribute("src", weather.lottieUrl || "https://assets7.lottiefiles.com/packages/lf20_iwmd6pyr.json");
+        document.getElementById("weatherDesc").textContent = `${weather.icon || "🌦️"} ${weather.currentWeather || ""}`;
+        document.getElementById("weatherBonus").textContent = `🪴 Bonus: ${weather.cropBonuses || "None"}`;
+        if (weather.lottieUrl) {
+          document.getElementById("weatherLottie").setAttribute("src", weather.lottieUrl);
+        } else {
+          document.getElementById("weatherLottie").setAttribute("src", "https://assets7.lottiefiles.com/packages/lf20_iwmd6pyr.json");
+        }
 
-        const honeyList = honey.honeyStock || [];
+        const honeyList = Array.isArray(honey.honeyStock) ? honey.honeyStock : [];
         document.getElementById("honeyList").textContent = honeyList.length
-          ? honeyList.map((h) => `🍯 ${h.name}: ${h.value}`).join("\n")
+          ? honeyList.map(h => `🍯 ${h.name}: ${h.value}`).join("\n")
           : "No honey available.";
 
+        // Parse updatedAt timestamps safely, fallback to current time if missing
         const now = Date.now();
-        const gearLeft = 300 - Math.floor((now - gear.updatedAt) / 1000);
-        const eggLeft = 600 - Math.floor((now - egg.updatedAt) / 1000);
+        const gearUpdated = gear.updatedAt ? new Date(gear.updatedAt).getTime() : now;
+        const eggUpdated = egg.updatedAt ? new Date(egg.updatedAt).getTime() : now;
+
+        const gearLeft = 300 - Math.floor((now - gearUpdated) / 1000);
+        const eggLeft = 600 - Math.floor((now - eggUpdated) / 1000);
+
         updateCountdown("gearFill", gearLeft, 300);
         updateCountdown("eggFill", eggLeft, 600);
         drawCircularTimer("gearCircle", (gearLeft / 300) * 100);
         drawCircularTimer("eggCircle", (eggLeft / 600) * 100);
 
+        // Hide loading screen after successful data fetch and rendering
         loadingScreen.classList.add("hidden");
       } catch (err) {
         console.error("Fetch error:", err);
+        // Optionally keep loading screen or show error message instead
+        // For now, keep loading screen visible if fetch fails
       }
     }
 
+    // Initial fetch on page load
     fetchData();
+
+    // Refresh data every 30 seconds
     setInterval(fetchData, 30000);
 
+    // Load particle background animation
     tsParticles.load("tsparticles", {
       fullScreen: { enable: false },
       particles: {
